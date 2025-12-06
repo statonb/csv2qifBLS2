@@ -37,6 +37,15 @@ class FileProcessor
         double          withdrawModifier;
 };
 
+class DebitCreditFileProcessor: virtual public FileProcessor
+{
+    public:
+        DebitCreditFileProcessor();
+
+    protected:
+        bool    extractDebitCredit(int debitField, int creditField);
+};
+
 class BoAFileProcessor: public FileProcessor
 {
     public:
@@ -46,7 +55,7 @@ class BoAFileProcessor: public FileProcessor
         virtual bool    extractData(void);
 };
 
-class CitiFileProcessor: public FileProcessor
+class CitiFileProcessor: public DebitCreditFileProcessor
 {
     public:
         CitiFileProcessor();
@@ -55,7 +64,7 @@ class CitiFileProcessor: public FileProcessor
         virtual bool    extractData(void);
 };
 
-class BrokerageFileProcessor: public FileProcessor
+class BrokerageFileProcessor: virtual public FileProcessor
 {
     public:
         BrokerageFileProcessor();
@@ -80,13 +89,13 @@ class FidelityFileProcessor: public BrokerageFileProcessor
         virtual bool    extractData(void);
 };
 
-class SchwabFileProcessor: public BrokerageFileProcessor
+class SchwabFileProcessor: virtual public FileProcessor
 {
     public:
         SchwabFileProcessor();
 };
 
-class SchwabBankFileProcessor: public SchwabFileProcessor
+class SchwabBankFileProcessor: virtual public DebitCreditFileProcessor, public SchwabFileProcessor
 {
     public:
         SchwabBankFileProcessor();
@@ -95,7 +104,7 @@ class SchwabBankFileProcessor: public SchwabFileProcessor
         virtual bool    extractData(void);
 };
 
-class SchwabBrokerageFileProcessor: public SchwabFileProcessor
+class SchwabBrokerageFileProcessor: public BrokerageFileProcessor, public SchwabFileProcessor
 {
     public:
         SchwabBrokerageFileProcessor();

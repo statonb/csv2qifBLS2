@@ -45,6 +45,31 @@ bool FileProcessor::processLine(char *line)
 
     return ret;
 }
+
+DebitCreditFileProcessor::DebitCreditFileProcessor() : FileProcessor()
+{
+
+}
+
+bool DebitCreditFileProcessor::extractDebitCredit(int debitField, int creditField)
+{
+    strcpy(amt, fields[debitField]);
+    // The debit field might be empty
+    if (amt[0] == '\0')
+    {
+        strcpy(amt, fields[creditField]);     // Try the Credit field instead
+        withdrawModifier = 1.0;
+    }
+    else
+    {
+        // Debit (or withdraw) field had an entry.
+        // This is a positive number, but
+        // QIF needs it to be negative.
+        withdrawModifier = -1.0;
+    }
+    return true;
+}
+
 BoAFileProcessor::BoAFileProcessor() : FileProcessor()
 {
     inTransactionKey = "Date,";
@@ -119,35 +144,24 @@ void BrokerageFileProcessor::modifyTBillDescription(void)
     }
 }
 
-CitiFileProcessor::CitiFileProcessor() : FileProcessor()
+CitiFileProcessor::CitiFileProcessor() : DebitCreditFileProcessor()
 {
     inTransactionKey = "Status";
 }
 
 bool CitiFileProcessor::extractData(void)
 {
+    bool ret = false;
+
     strcpy(date, fields[1]);
     strip_quotes(date);
 
     strcpy(desc, fields[2]);
     strip_quotes(desc);
 
-    // This is the debit field in Citi.  It might be blank
-    strcpy(amt, fields[3]);
-    if (amt[0] == '\0')
-    {
-        strcpy(amt, fields[4]);     // Try the Credit field instead
-        withdrawModifier = 1.0;
-    }
-    else
-    {
-        // Withdraw field had an entry.
-        // Citi lists this as a positive number, but
-        // QIF needs it to be negative.
-        withdrawModifier = -1.0;
-    }
+    ret = extractDebitCredit(3, 4);
 
-    return true;
+    return ret;
 }
 
 FidelityFileProcessor::FidelityFileProcessor() : BrokerageFileProcessor()
@@ -188,41 +202,31 @@ bool FidelityFileProcessor::extractData(void)
     return true;
 }
 
-SchwabFileProcessor::SchwabFileProcessor(): BrokerageFileProcessor()
+SchwabFileProcessor::SchwabFileProcessor(): FileProcessor()
 {
     inTransactionKey = "Date,";
 }
 
-SchwabBankFileProcessor::SchwabBankFileProcessor(): SchwabFileProcessor()
+SchwabBankFileProcessor::SchwabBankFileProcessor(): DebitCreditFileProcessor(), SchwabFileProcessor()
 {
 }
 
 bool SchwabBankFileProcessor::extractData(void)
 {
+    bool ret = false;
+
     strcpy(date, fields[0]);
     strip_quotes(date);
 
     strcpy(desc, fields[4]);
     strip_quotes(desc);
 
-    // This is the Withdraw filed in Schwab.  It might be blank
-    strcpy(amt, fields[5]);
-    if (amt[0] == '\0')
-    {
-        strcpy(amt, fields[6]);     // Try the Deposit field instead
-        withdrawModifier = 1.0;
-    }
-    else
-    {
-        // Withdraw field had an entry.
-        // Schwab lists this as a positive number, but
-        // QIF needs it to be negative.
-        withdrawModifier = -1.0;
-    }
-    return true;
+    ret = extractDebitCredit(5, 6);
+
+    return ret;
 }
 
-SchwabBrokerageFileProcessor::SchwabBrokerageFileProcessor(): SchwabFileProcessor()
+SchwabBrokerageFileProcessor::SchwabBrokerageFileProcessor(): BrokerageFileProcessor(), SchwabFileProcessor()
 {
 }
 

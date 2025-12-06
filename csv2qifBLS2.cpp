@@ -10,7 +10,7 @@
 #include "fileProcessor.h"
 #include "stringUtils.h"
 
-const char *SW_VERSION =    "2.01";
+const char *SW_VERSION =    "2.02";
 const char *SW_DATE =       "2025-12-06";
 
 typedef enum
@@ -90,6 +90,7 @@ void usage(const char *prog, const char *extraLine)
     fprintf(stderr, "                             SchwabBrokerage\n");
     fprintf(stderr, "-q --quiet                Quiet running (or decrease verbosity).\n");
     fprintf(stderr, "-v --verbose              Increase verbosity\n");
+    fprintf(stderr, "-h -?                     Show this usage\n");
     if (extraLine) fprintf(stderr, "\n%s\n", extraLine);
 }
 
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         int optionIndex = 0;
-        opt = getopt_long(argc, argv, "i:o:f:qv", longOptions, &optionIndex);
+        opt = getopt_long(argc, argv, "i:o:f:qvh?", longOptions, &optionIndex);
 
         if (-1 == opt) break;
 
@@ -146,6 +147,8 @@ int main(int argc, char *argv[])
         case 'v':
             ++verbosity;
             break;
+        case 'h':
+        case '?':
         default:
             usageError = true;
             break;
@@ -162,10 +165,6 @@ int main(int argc, char *argv[])
     {
         usage(basename(argv[0]), "Unknown Bank Format");
         return -6;
-    }
-    else
-    {
-        printf("Bank Format: %d\n", (int)bankFormat);
     }
 
     // strcpy(inFileName, "/home/bruno/Downloads/schwab.csv");
@@ -238,6 +237,12 @@ int main(int argc, char *argv[])
     else
     {
         theFileProcessor = got->second;
+    }
+
+    if (verbosity >= 1)
+    {
+        printf("%s Ver %s %s\n", basename(argv[0]), SW_VERSION, SW_DATE);
+        printf("Bank Format: %d\n", (int)bankFormat);
     }
 
     fprintf(fpOut, "!Type:Bank\n");
