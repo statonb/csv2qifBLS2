@@ -1,0 +1,107 @@
+#ifndef _FILE_PROCESSOR_H_
+#define _FILE_PROCESSOR_H_
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+#include <string>
+#include "parseCsvLine.h"
+#include "cusipBankMap.h"
+#include "mmSymbols.h"
+
+class FileProcessor
+{
+    public:
+        FileProcessor();
+
+        double      getAmtd(void)   {return amtd;}
+        const char *getDate(void)   {return date;}
+        const char *getDesc(void)   {return desc;}
+        bool        isInTransactions(const char *line);
+        bool        processLine(char *line);
+
+    protected:
+
+        virtual bool    extractData(void) = 0;
+
+        char            amt[MAX_LINE];
+        double          amtd;
+        char            date[MAX_LINE];
+        char            desc[MAX_LINE];
+        char            fields[MAX_FIELDS][MAX_LINE];
+        std::string     inTransactionKey;
+        bool            inTransactionSection;
+        double          withdrawModifier;
+};
+
+class BoAFileProcessor: public FileProcessor
+{
+    public:
+        BoAFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+};
+
+class CitiFileProcessor: public FileProcessor
+{
+    public:
+        CitiFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+};
+
+class BrokerageFileProcessor: public FileProcessor
+{
+    public:
+        BrokerageFileProcessor();
+
+    protected:
+        char                cashBal[MAX_LINE];
+        CUSIPBankMap        cusip2bank;
+        MoneyMarketSymbols  mmSymbols;
+        char                symbol[MAX_LINE];
+
+        void                modifyCDDescription(void);
+        void                modifyMMDescription(void);
+        void                modifyTBillDescription(void);
+};
+
+class FidelityFileProcessor: public BrokerageFileProcessor
+{
+    public:
+        FidelityFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+};
+
+class SchwabFileProcessor: public BrokerageFileProcessor
+{
+    public:
+        SchwabFileProcessor();
+};
+
+class SchwabBankFileProcessor: public SchwabFileProcessor
+{
+    public:
+        SchwabBankFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+};
+
+class SchwabBrokerageFileProcessor: public SchwabFileProcessor
+{
+    public:
+        SchwabBrokerageFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+};
+
+#endif
