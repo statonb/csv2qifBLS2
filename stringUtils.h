@@ -5,4 +5,5 @@ void strip_quotes(char *s);
 void remove_all_quotes(char *s);
 void remove_commas_and_dollars(char *s);
 char *strcasestr_simple(const char *hay, const char *needle);
+int iso_to_qif_date(const char *iso, char *out, size_t outsz);
 #endif

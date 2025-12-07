@@ -13,6 +13,18 @@ bool FileProcessor::isInTransactions(const char *line)
     return (strncmp(line, inTransactionKey.c_str(), inTransactionKey.length()) == 0);
 }
 
+bool FileProcessor::extractStandard(int dateField, int descField, int amtField)
+{
+    strcpy(date, fields[dateField]);
+    strip_quotes(date);
+    strcpy(desc, fields[descField]);
+    strip_quotes(desc);
+    strcpy(amt, fields[amtField]);
+    strip_quotes(amt);
+    remove_commas_and_dollars(amt);
+    return true;
+}
+
 bool FileProcessor::processLine(char *line)
 {
     bool ret = false;
@@ -35,11 +47,7 @@ bool FileProcessor::processLine(char *line)
 
     if (ret)
     {
-        strip_quotes(amt);
-        remove_commas_and_dollars(amt);
-
         if (amt[0] == '\0') ret = false;
-
         amtd = strtod(amt, NULL) * withdrawModifier;
     }
 
@@ -73,7 +81,22 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
         // QIF needs it to be negative.
         withdrawModifier = -1.0;
     }
+    strip_quotes(amt);
+    remove_commas_and_dollars(amt);
+
     return true;
+}
+
+AllyFileProcessor::AllyFileProcessor() : FileProcessor()
+{
+    inTransactionKey = "Date,";
+}
+
+bool AllyFileProcessor::extractData(void)
+{
+    extractStandard(0, 4, 2);
+    // Fix date format
+    return (iso_to_qif_date(date, date, sizeof(date))) ? true : false;
 }
 
 BoAFileProcessor::BoAFileProcessor() : FileProcessor()
@@ -83,12 +106,7 @@ BoAFileProcessor::BoAFileProcessor() : FileProcessor()
 
 bool BoAFileProcessor::extractData(void)
 {
-    strcpy(date, fields[0]);
-    strip_quotes(date);
-    strcpy(desc, fields[1]);
-    strip_quotes(desc);
-    strcpy(amt, fields[2]);
-    return true;
+    return extractStandard(0, 1, 2);
 }
 
 BrokerageFileProcessor::BrokerageFileProcessor() : FileProcessor()
@@ -173,6 +191,10 @@ bool FidelityFileProcessor::extractData(void)
         // Skip transactions that are still in process
         return false;
     }
+
+    // Don't use the standard extract for Fidelity.
+    // Check to be sure the date is valid because
+    // Fidelity puts long text lines at the end of the file.
     strcpy(date, fields[0]);
     strip_quotes(date);
     if (isdigit(date[0]) == 0) {
@@ -182,6 +204,9 @@ bool FidelityFileProcessor::extractData(void)
     strcpy(desc, fields[1]);
     strcpy(symbol, fields[2]);
     strcpy(amt, fields[14]);
+    strip_quotes(amt);
+    remove_commas_and_dollars(amt);
+
 
     // Determine if the description needs to be modified
     strip_quotes(desc);
@@ -220,19 +245,15 @@ bool SchwabBrokerageFileProcessor::extractData(void)
 {
     char            *cp;
 
-    strcpy(date, fields[0]);
-    strip_quotes(date);
-    // Remove any "as of ..." portion of this field
+    extractStandard(0, 3, 7);
+    // Remove any "as of ..." portion of the field
     cp = strstr(date, " as of");
     if (cp) *cp = '\0';
 
-    strcpy(desc, fields[3]);
     strcpy(symbol, fields[2]);
-    strcpy(amt, fields[7]);
+    strip_quotes(symbol);
 
     // Determine if the description needs to be modified
-    strip_quotes(desc);
-    strip_quotes(symbol);
     if (mmSymbols.contains(symbol)) {
         // Replace the description with the action
         strcpy(desc, fields[1]);

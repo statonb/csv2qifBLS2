@@ -26,6 +26,7 @@ class FileProcessor
     protected:
 
         virtual bool    extractData(void) = 0;
+        bool            extractStandard(int dateField, int descField, int amtField);
 
         char            amt[MAX_LINE];
         double          amtd;
@@ -44,6 +45,15 @@ class DebitCreditFileProcessor: virtual public FileProcessor
 
     protected:
         bool    extractDebitCredit(int dateField, int descField, int debitField, int creditField);
+};
+
+class AllyFileProcessor: public FileProcessor
+{
+    public:
+        AllyFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
 };
 
 class BoAFileProcessor: public FileProcessor

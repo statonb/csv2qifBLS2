@@ -10,12 +10,13 @@
 #include "fileProcessor.h"
 #include "stringUtils.h"
 
-const char *SW_VERSION =    "2.03";
-const char *SW_DATE =       "2025-12-06";
+const char *SW_VERSION =    "2.04";
+const char *SW_DATE =       "2025-12-07";
 
 typedef enum
 {
     UNKNOWN_BANK_FORMAT
+    , ALLY_FORMAT
     , BOA_FORMAT
     , CITI_FORMAT
     , FIDELITY_FORMAT
@@ -23,6 +24,7 @@ typedef enum
     , SCHWAB_BROKERAGE_FORMAT
 }   bankFormat_t;
 
+AllyFileProcessor               theAllyFileProcessor;
 BoAFileProcessor                theBoAFileProcessor;
 CitiFileProcessor               theCitiFileProcessor;
 FidelityFileProcessor           theFidelityFileProcessor;
@@ -31,7 +33,8 @@ SchwabBrokerageFileProcessor    theSchwabBrokerageFileProcessor;
 
 std::unordered_map<bankFormat_t, FileProcessor *> bankMap =
 {
-    {BOA_FORMAT,                &theBoAFileProcessor}
+    {ALLY_FORMAT,               &theAllyFileProcessor}
+    ,{BOA_FORMAT,               &theBoAFileProcessor}
     ,{CITI_FORMAT,              &theCitiFileProcessor}
     ,{FIDELITY_FORMAT,          &theFidelityFileProcessor}
     ,{SCHWAB_BANK_FORMAT,       &theSchwabBankFileProcessor}
@@ -46,6 +49,10 @@ bankFormat_t string2bankFormat(const char *s)
     if (strcasestr_simple(s, "boa"))
     {
         ret = BOA_FORMAT;
+    }
+    else if (strcasestr_simple(s, "ally"))
+    {
+        ret = ALLY_FORMAT;
     }
     else if (strcasestr_simple(s, "citi"))
     {
@@ -83,6 +90,7 @@ void usage(const char *prog, const char *extraLine)
     fprintf(stderr, "                          if not provided.\n");
     fprintf(stderr, "-f --format Bank          Different banks format CSV files differently.\n");
     fprintf(stderr, "                          Possible selections are as follows:\n");
+    fprintf(stderr, "                             Ally\n");
     fprintf(stderr, "                             BoA\n");
     fprintf(stderr, "                             Citi\n");
     fprintf(stderr, "                             Fidelity\n");
