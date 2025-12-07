@@ -51,8 +51,14 @@ DebitCreditFileProcessor::DebitCreditFileProcessor() : FileProcessor()
 
 }
 
-bool DebitCreditFileProcessor::extractDebitCredit(int debitField, int creditField)
+bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, int debitField, int creditField)
 {
+    strcpy(date, fields[dateField]);
+    strip_quotes(date);
+
+    strcpy(desc, fields[descField]);
+    strip_quotes(desc);
+
     strcpy(amt, fields[debitField]);
     // The debit field might be empty
     if (amt[0] == '\0')
@@ -151,17 +157,7 @@ CitiFileProcessor::CitiFileProcessor() : DebitCreditFileProcessor()
 
 bool CitiFileProcessor::extractData(void)
 {
-    bool ret = false;
-
-    strcpy(date, fields[1]);
-    strip_quotes(date);
-
-    strcpy(desc, fields[2]);
-    strip_quotes(desc);
-
-    ret = extractDebitCredit(3, 4);
-
-    return ret;
+    return extractDebitCredit(1, 2, 3, 4);
 }
 
 FidelityFileProcessor::FidelityFileProcessor() : BrokerageFileProcessor()
@@ -213,17 +209,7 @@ SchwabBankFileProcessor::SchwabBankFileProcessor(): DebitCreditFileProcessor(), 
 
 bool SchwabBankFileProcessor::extractData(void)
 {
-    bool ret = false;
-
-    strcpy(date, fields[0]);
-    strip_quotes(date);
-
-    strcpy(desc, fields[4]);
-    strip_quotes(desc);
-
-    ret = extractDebitCredit(5, 6);
-
-    return ret;
+    return extractDebitCredit(0, 4, 5, 6);
 }
 
 SchwabBrokerageFileProcessor::SchwabBrokerageFileProcessor(): BrokerageFileProcessor(), SchwabFileProcessor()
@@ -233,6 +219,7 @@ SchwabBrokerageFileProcessor::SchwabBrokerageFileProcessor(): BrokerageFileProce
 bool SchwabBrokerageFileProcessor::extractData(void)
 {
     char            *cp;
+
     strcpy(date, fields[0]);
     strip_quotes(date);
     // Remove any "as of ..." portion of this field

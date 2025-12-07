@@ -43,7 +43,7 @@ class DebitCreditFileProcessor: virtual public FileProcessor
         DebitCreditFileProcessor();
 
     protected:
-        bool    extractDebitCredit(int debitField, int creditField);
+        bool    extractDebitCredit(int dateField, int descField, int debitField, int creditField);
 };
 
 class BoAFileProcessor: public FileProcessor
@@ -70,7 +70,6 @@ class BrokerageFileProcessor: virtual public FileProcessor
         BrokerageFileProcessor();
 
     protected:
-        char                cashBal[MAX_LINE];
         CUSIPBankMap        cusip2bank;
         MoneyMarketSymbols  mmSymbols;
         char                symbol[MAX_LINE];
@@ -86,7 +85,9 @@ class FidelityFileProcessor: public BrokerageFileProcessor
         FidelityFileProcessor();
 
     protected:
-        virtual bool    extractData(void);
+        char                cashBal[MAX_LINE];
+
+        virtual bool        extractData(void);
 };
 
 class SchwabFileProcessor: virtual public FileProcessor
