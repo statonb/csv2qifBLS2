@@ -20,8 +20,7 @@ bool FileProcessor::extractStandard(int dateField, int descField, int amtField)
     strcpy(desc, fields[descField]);
     strip_quotes(desc);
     strcpy(amt, fields[amtField]);
-    strip_quotes(amt);
-    remove_commas_and_dollars(amt);
+    remove_commas_dollars_and_quotes(amt);
     return true;
 }
 
@@ -81,8 +80,7 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
         // QIF needs it to be negative.
         withdrawModifier = -1.0;
     }
-    strip_quotes(amt);
-    remove_commas_and_dollars(amt);
+    remove_commas_dollars_and_quotes(amt);
 
     return true;
 }
@@ -204,8 +202,7 @@ bool FidelityFileProcessor::extractData(void)
     strcpy(desc, fields[1]);
     strcpy(symbol, fields[2]);
     strcpy(amt, fields[14]);
-    strip_quotes(amt);
-    remove_commas_and_dollars(amt);
+    remove_commas_dollars_and_quotes(amt);
 
 
     // Determine if the description needs to be modified

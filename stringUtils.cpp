@@ -27,12 +27,13 @@ void remove_all_quotes(char *s) {
     *dst = '\0';
 }
 
-// Remove all commas from a number field
-void remove_commas_and_dollars(char *s) {
+// Remove all characters from a number field
+void remove_commas_dollars_and_quotes(char *s) {
     char *dst = s, *src = s;
     while (*src) {
         if  (   (*src != ',')
              && (*src != '$')
+             && (*src != '"')
             )
         {
             *dst++ = *src;
