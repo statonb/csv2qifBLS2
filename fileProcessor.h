@@ -20,13 +20,13 @@ class FileProcessor
         double      getAmtd(void)   {return amtd;}
         const char *getDate(void)   {return date;}
         const char *getDesc(void)   {return desc;}
-        bool        isInTransactions(const char *line);
         bool        processLine(char *line);
 
     protected:
 
         virtual bool    extractData(void) = 0;
         bool            extractStandard(int dateField, int descField, int amtField);
+        bool            isInTransactions(const char *line);
 
         char            amt[MAX_LINE];
         double          amtd;
@@ -106,7 +106,7 @@ class SchwabFileProcessor: virtual public FileProcessor
         SchwabFileProcessor();
 };
 
-class SchwabBankFileProcessor: virtual public DebitCreditFileProcessor, public SchwabFileProcessor
+class SchwabBankFileProcessor: public DebitCreditFileProcessor, public SchwabFileProcessor
 {
     public:
         SchwabBankFileProcessor();
