@@ -24,6 +24,11 @@ bool FileProcessor::extractStandard(int dateField, int descField, int amtField)
     return true;
 }
 
+void FileProcessor::modifyDescription(char *desc)
+{
+    (void)desc;
+}
+
 bool FileProcessor::processLine(char *line)
 {
     bool ret = false;
@@ -65,6 +70,7 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
 
     strcpy(desc, fields[descField]);
     strip_quotes(desc);
+    modifyDescription(desc);        // Perform custom description modifications on per-bank type basis
 
     strcpy(amt, fields[debitField]);
     // The debit field might be empty
@@ -232,6 +238,15 @@ SchwabBankFileProcessor::SchwabBankFileProcessor(): DebitCreditFileProcessor(), 
 bool SchwabBankFileProcessor::extractData(void)
 {
     return extractDebitCredit(0, 4, 5, 6);
+}
+
+void SchwabBankFileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "Interest Paid"))
+    {
+        strcpy(desc, "Interest Earned");
+    }
+    return;
 }
 
 SchwabBrokerageFileProcessor::SchwabBrokerageFileProcessor(): BrokerageFileProcessor(), SchwabFileProcessor()

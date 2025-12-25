@@ -27,6 +27,7 @@ class FileProcessor
         virtual bool    extractData(void) = 0;
         bool            extractStandard(int dateField, int descField, int amtField);
         bool            isInTransactions(const char *line);
+        virtual void    modifyDescription(char *desc);
 
         char            amt[MAX_LINE];
         double          amtd;
@@ -113,6 +114,7 @@ class SchwabBankFileProcessor: public DebitCreditFileProcessor, public SchwabFil
 
     protected:
         virtual bool    extractData(void);
+        virtual void    modifyDescription(char *dest);
 };
 
 class SchwabBrokerageFileProcessor: public BrokerageFileProcessor, public SchwabFileProcessor
