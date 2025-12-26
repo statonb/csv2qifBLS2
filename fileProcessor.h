@@ -26,7 +26,7 @@ class FileProcessor
 
         virtual bool    extractData(void) = 0;
         bool            extractStandard(int dateField, int descField, int amtField);
-        bool            isInTransactions(const char *line);
+        virtual bool    isInTransactions(const char *line);
         virtual void    modifyDescription(char *desc);
 
         char            amt[MAX_LINE];
@@ -55,6 +55,17 @@ class AllyFileProcessor: public FileProcessor
 
     protected:
         virtual bool    extractData(void);
+};
+
+class AmexFileProcessor: public FileProcessor
+{
+    public:
+        AmexFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+        virtual bool    isInTransactions(const char *line);
+        virtual void    modifyDescription(char *dest);
 };
 
 class BoAFileProcessor: public FileProcessor

@@ -19,6 +19,7 @@ bool FileProcessor::extractStandard(int dateField, int descField, int amtField)
     strip_quotes(date);
     strcpy(desc, fields[descField]);
     strip_quotes(desc);
+    modifyDescription(desc);        // Perform custom description modifications on per-bank type basis
     strcpy(amt, fields[amtField]);
     remove_commas_dollars_and_quotes(amt);
     return true;
@@ -89,6 +90,34 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
     remove_commas_dollars_and_quotes(amt);
 
     return true;
+}
+
+AmexFileProcessor::AmexFileProcessor() : FileProcessor()
+{
+    inTransactionKey = "<UNUSED>";
+    inTransactionSection = true;
+}
+
+bool AmexFileProcessor::extractData(void)
+{
+    extractStandard(0, 1, 2);
+    // Fix date format
+    return (iso_to_qif_date(date, date, sizeof(date))) ? true : false;
+}
+
+void AmexFileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "Interest Payment"))
+    {
+        strcpy(desc, "Interest Earned");
+    }
+    return;
+}
+
+bool AmexFileProcessor::isInTransactions(const char *line)
+{
+    (void)line;
+    return true;    // There is no header in Ally files.  The first line is a transaction
 }
 
 AllyFileProcessor::AllyFileProcessor() : FileProcessor()
