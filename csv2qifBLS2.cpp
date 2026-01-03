@@ -10,8 +10,8 @@
 #include "fileProcessor.h"
 #include "stringUtils.h"
 
-const char *SW_VERSION =    "2.06";
-const char *SW_DATE =       "2025-12-26";
+const char *SW_VERSION =    "2.07";
+const char *SW_DATE =       "2026-01-03";
 
 typedef enum
 {
@@ -123,11 +123,12 @@ int main(int argc, char *argv[])
     FILE                *fpOut;
     char                line[MAX_LINE];
     int                 numTransactions = 0;
-    int                 verbosity = 1;
+    int                 verbosity = 2;
     bankFormat_t        bankFormat = UNKNOWN_BANK_FORMAT;
     FileProcessor       *theFileProcessor;
 
-    inFileName[0] = '\0';
+    // inFileName[0] = '\0';
+    strcpy(inFileName, "stmt"); // Default input file name
     outFileName[0] = '\0';
 
     struct option longOptions[] =
