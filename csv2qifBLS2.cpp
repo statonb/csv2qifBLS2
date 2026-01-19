@@ -10,8 +10,8 @@
 #include "fileProcessor.h"
 #include "stringUtils.h"
 
-const char *SW_VERSION =    "2.07";
-const char *SW_DATE =       "2026-01-03";
+const char *SW_VERSION =    "2.08";
+const char *SW_DATE =       "2026-01-18";
 
 typedef enum
 {
@@ -19,30 +19,42 @@ typedef enum
     , ALLY_FORMAT
     , AMEX_FORMAT
     , BOA_FORMAT
+    , CAP1_FORMAT
     , CITI_FORMAT
+    , DISCOVER_BANK_FORMAT
     , FIDELITY_FORMAT
+    , FNBO_FORMAT
     , SCHWAB_BANK_FORMAT
     , SCHWAB_BROKERAGE_FORMAT
+    , TFCU_FORMAT
 }   bankFormat_t;
 
 
 AllyFileProcessor               theAllyFileProcessor;
 AmexFileProcessor               theAmexFileProcessor;
 BoAFileProcessor                theBoAFileProcessor;
+Cap1FileProcessor               theCap1FileProcessor;
 CitiFileProcessor               theCitiFileProcessor;
+DiscoverBankFileProcessor       theDiscoverBankFileProcessor;
 FidelityFileProcessor           theFidelityFileProcessor;
+FNBOFileProcessor               theFNBOFileProcessor;
 SchwabBankFileProcessor         theSchwabBankFileProcessor;
 SchwabBrokerageFileProcessor    theSchwabBrokerageFileProcessor;
+TFCUFileProcessor               theTFCUFileProcessor;
 
 std::unordered_map<bankFormat_t, FileProcessor *> bankMap =
 {
     {ALLY_FORMAT,               &theAllyFileProcessor}
     ,{AMEX_FORMAT,              &theAmexFileProcessor}
     ,{BOA_FORMAT,               &theBoAFileProcessor}
+    ,{CAP1_FORMAT,              &theCap1FileProcessor}
     ,{CITI_FORMAT,              &theCitiFileProcessor}
+    ,{DISCOVER_BANK_FORMAT,     &theDiscoverBankFileProcessor}
     ,{FIDELITY_FORMAT,          &theFidelityFileProcessor}
+    ,{FNBO_FORMAT,              &theFNBOFileProcessor}
     ,{SCHWAB_BANK_FORMAT,       &theSchwabBankFileProcessor}
     ,{SCHWAB_BROKERAGE_FORMAT,  &theSchwabBrokerageFileProcessor}
+    ,{TFCU_FORMAT,              &theTFCUFileProcessor}
 };
 
 
@@ -62,13 +74,25 @@ bankFormat_t string2bankFormat(const char *s)
     {
         ret = AMEX_FORMAT;
     }
+    else if (strcasestr_simple(s, "cap1"))
+    {
+        ret = CAP1_FORMAT;
+    }
     else if (strcasestr_simple(s, "citi"))
     {
         ret = CITI_FORMAT;
     }
+    else if (strcasestr_simple(s, "disc"))
+    {
+        ret = DISCOVER_BANK_FORMAT;
+    }
     else if (strcasestr_simple(s, "fid"))
     {
         ret = FIDELITY_FORMAT;
+    }
+    else if (strcasestr_simple(s, "fnbo"))
+    {
+        ret = FNBO_FORMAT;
     }
     else if (strcasestr_simple(s, "schwabbank"))
     {
@@ -77,6 +101,10 @@ bankFormat_t string2bankFormat(const char *s)
     else if (strcasestr_simple(s, "schwabbrok"))
     {
         ret = SCHWAB_BROKERAGE_FORMAT;
+    }
+    else if (strcasestr_simple(s, "tfcu"))
+    {
+        ret = TFCU_FORMAT;
     }
     else
     {
@@ -101,10 +129,14 @@ void usage(const char *prog, const char *extraLine)
     fprintf(stderr, "                             Ally\n");
     fprintf(stderr, "                             Amex\n");
     fprintf(stderr, "                             BoA\n");
+    fprintf(stderr, "                             Cap1\n");
     fprintf(stderr, "                             Citi\n");
+    fprintf(stderr, "                             Discover\n");
     fprintf(stderr, "                             Fidelity\n");
+    fprintf(stderr, "                             FNBO\n");
     fprintf(stderr, "                             SchwabBank\n");
     fprintf(stderr, "                             SchwabBrokerage\n");
+    fprintf(stderr, "                             TFCU\n");
     fprintf(stderr, "-q --quiet                Quiet running (or decrease verbosity).\n");
     fprintf(stderr, "-v --verbose              Increase verbosity\n");
     fprintf(stderr, "-h -?                     Show this usage\n");

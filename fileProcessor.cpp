@@ -74,10 +74,14 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
     modifyDescription(desc);        // Perform custom description modifications on per-bank type basis
 
     strcpy(amt, fields[debitField]);
-    // The debit field might be empty
-    if (amt[0] == '\0')
+    remove_commas_dollars_and_quotes(amt);
+    // The debit field might be empty or zero
+    if  (   (amt[0] == '\0')
+         || (0 == strcmp(amt, "0"))
+        )
     {
         strcpy(amt, fields[creditField]);     // Try the Credit field instead
+        remove_commas_dollars_and_quotes(amt);
         withdrawModifier = 1.0;
     }
     else
@@ -87,9 +91,44 @@ bool DebitCreditFileProcessor::extractDebitCredit(int dateField, int descField, 
         // QIF needs it to be negative.
         withdrawModifier = -1.0;
     }
-    remove_commas_dollars_and_quotes(amt);
 
     return true;
+}
+
+bool DebitCreditFileProcessor::extractDebitCreditByType(int dateField, int descField, int amtField, int debitCreditField)
+{
+    char debitCredit[MAX_LINE];
+    bool ret = true;
+
+    strcpy(date, fields[dateField]);
+    strip_quotes(date);
+
+    strcpy(desc, fields[descField]);
+    strip_quotes(desc);
+    modifyDescription(desc);        // Perform custom description modifications on per-bank type basis
+
+    strcpy(amt, fields[amtField]);
+    remove_commas_dollars_and_quotes(amt);
+
+    strcpy(debitCredit, fields[debitCreditField]);
+    strip_quotes(debitCredit);
+
+    // The debit/credit field should contain "Debit" or "Credit"
+    // If it's "Debit", make it negative
+    if (strcasestr_simple(debitCredit, "debit"))
+    {
+        withdrawModifier = -1.0;
+    }
+    else if(strcasestr_simple(debitCredit, "credit"))
+    {
+        withdrawModifier = 1.0;
+    }
+    else
+    {
+        ret = false;
+    }
+
+    return ret;
 }
 
 AmexFileProcessor::AmexFileProcessor() : FileProcessor()
@@ -211,6 +250,46 @@ bool CitiFileProcessor::extractData(void)
     return extractDebitCredit(1, 2, 3, 4);
 }
 
+Cap1FileProcessor::Cap1FileProcessor() : DebitCreditFileProcessor()
+{
+    inTransactionKey = "Account Number,";
+}
+
+bool Cap1FileProcessor::extractData(void)
+{
+    bool ret = extractDebitCreditByType(2, 1, 4, 3);
+    modifyDescription(desc);
+    return ret;
+}
+
+void Cap1FileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "Monthly Interest Paid"))
+    {
+        strcpy(desc, "Interest Earned");
+    }
+    return;
+}
+
+DiscoverBankFileProcessor::DiscoverBankFileProcessor() : DebitCreditFileProcessor()
+{
+    inTransactionKey = "Transaction Date,";
+}
+
+bool DiscoverBankFileProcessor::extractData(void)
+{
+    return extractDebitCredit(0, 1, 3, 4);
+}
+
+void DiscoverBankFileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "Interest Paid"))
+    {
+        strcpy(desc, "Interest Earned");
+    }
+    return;
+}
+
 FidelityFileProcessor::FidelityFileProcessor() : BrokerageFileProcessor()
 {
     inTransactionKey = "Run Date,";
@@ -253,6 +332,32 @@ bool FidelityFileProcessor::extractData(void)
         modifyCDDescription();
     }
     return true;
+}
+
+FNBOFileProcessor::FNBOFileProcessor() : FileProcessor()
+{
+    inTransactionKey = "<UNUSED>";
+    inTransactionSection = true;
+}
+
+bool FNBOFileProcessor::extractData(void)
+{
+    return extractStandard(0, 3, 1);
+}
+
+void FNBOFileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "INTEREST PAYMENT"))
+    {
+        strcpy(desc, "Interest Earned");
+    }
+    return;
+}
+
+bool FNBOFileProcessor::isInTransactions(const char *line)
+{
+    (void)line;
+    return true;    // There is no header in Ally files.  The first line is a transaction
 }
 
 SchwabFileProcessor::SchwabFileProcessor(): FileProcessor()
@@ -304,3 +409,21 @@ bool SchwabBrokerageFileProcessor::extractData(void)
     return true;
 }
 
+TFCUFileProcessor::TFCUFileProcessor() : FileProcessor()
+{
+    inTransactionKey = "Transaction ID,";
+}
+
+bool TFCUFileProcessor::extractData(void)
+{
+    return extractStandard(1, 7, 4);
+}
+
+void TFCUFileProcessor::modifyDescription(char *desc)
+{
+    if (strstr(desc, "Dividend"))
+    {
+        strcpy(desc, "TFCU Dividend");
+    }
+    return;
+}

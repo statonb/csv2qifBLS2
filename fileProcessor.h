@@ -46,6 +46,7 @@ class DebitCreditFileProcessor: virtual public FileProcessor
 
     protected:
         bool    extractDebitCredit(int dateField, int descField, int debitField, int creditField);
+        bool    extractDebitCreditByType(int dateField, int descField, int amtField, int debitCreditField);
 };
 
 class AllyFileProcessor: public FileProcessor
@@ -86,6 +87,26 @@ class CitiFileProcessor: public DebitCreditFileProcessor
         virtual bool    extractData(void);
 };
 
+class Cap1FileProcessor: public DebitCreditFileProcessor
+{
+    public:
+        Cap1FileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+        virtual void    modifyDescription(char *dest);
+};
+
+class DiscoverBankFileProcessor: public DebitCreditFileProcessor
+{
+    public:
+        DiscoverBankFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+        virtual void    modifyDescription(char *dest);
+};
+
 class BrokerageFileProcessor: virtual public FileProcessor
 {
     public:
@@ -112,6 +133,17 @@ class FidelityFileProcessor: public BrokerageFileProcessor
         virtual bool        extractData(void);
 };
 
+class FNBOFileProcessor: public FileProcessor
+{
+    public:
+        FNBOFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+        virtual bool    isInTransactions(const char *line);
+        virtual void    modifyDescription(char *dest);
+};
+
 class SchwabFileProcessor: virtual public FileProcessor
 {
     public:
@@ -135,6 +167,16 @@ class SchwabBrokerageFileProcessor: public BrokerageFileProcessor, public Schwab
 
     protected:
         virtual bool    extractData(void);
+};
+
+class TFCUFileProcessor: public FileProcessor
+{
+    public:
+        TFCUFileProcessor();
+
+    protected:
+        virtual bool    extractData(void);
+        virtual void    modifyDescription(char *dest);
 };
 
 #endif
