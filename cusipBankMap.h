@@ -15,6 +15,7 @@ public:
         cusipToBank = {
             {"00351DAF3", "ABINGTON BANK"},
             {"028501AL8", "THE AMERICAN NB OF TERRELL TEXAS"},
+            {"03077CEY7", "Ameris BANK"},
             {"05580A7E8", "BMW BK NORTH AMER UTAH"},
             {"05600XNV8", "BMO HARRIS BANK NA"},
             {"06051XBM3", "BANK OF AMERICA"},
