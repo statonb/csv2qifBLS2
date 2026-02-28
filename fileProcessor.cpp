@@ -226,6 +226,18 @@ void BrokerageFileProcessor::modifyMMDescription(void)
         strcpy(desc, symbol);
         strcat(desc, " Sale");
     }
+    else if (   (strncasecmp(desc, "Short Term Cap Gain Reinvest", 28) == 0)
+            )
+    {
+        strcpy(desc, symbol);
+        strcat(desc, " ST Gain");
+    }
+    else if (   (strncasecmp(desc, "Long Term Cap Gain Reinvest", 27) == 0)
+            )
+    {
+        strcpy(desc, symbol);
+        strcat(desc, " LT Gain");
+    }
 }
 
 void BrokerageFileProcessor::modifyTBillDescription(void)

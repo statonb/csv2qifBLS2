@@ -10,8 +10,8 @@
 #include "fileProcessor.h"
 #include "stringUtils.h"
 
-const char *SW_VERSION =    "2.09";
-const char *SW_DATE =       "2026-02-20";
+const char *SW_VERSION =    "2.10";
+const char *SW_DATE =       "2026-02-28";
 
 typedef enum
 {
